@@ -1,18 +1,17 @@
 from profissional import Profissional
 from visitante import Visitante
+import datetime
   
-
-class Visita:
-    print()
 
 l_profissionais = []
 l_visitantes = []
+dict_visitas = {'teste1':'teste2'}
 
 def CriaProfissional():
     """Recebe nome, profissão e sala e coloca o profissional na lista"""
     profissional = Profissional()
 
-    nome = input("Qual o nome desse profissional?").upper()
+    nome = input("Qual o nome desse profissional?").capitalize()
     profissao = input("Qual sua profissão?")
     sala = input("Em qual sala ele trabalha?")
 
@@ -22,28 +21,30 @@ def CriaProfissional():
 
 def criaVisitante():
     """Recebe nome e documento e atribui visitante na lista"""
-    profissional = Profissional()
+    visitante = Visitante()
 
-    nome = input("Qual o nome desse profissional?").upper()
-    profissao = input("Qual sua profissão?")
-    sala = input("Em qual sala ele trabalha?")
+    nome = input("Qual o nome desse visitante?").capitalize()
+    documento = input("Qual seu RG?")
 
-    profissional.setDados(nome,profissao,sala)
+    visitante.setDados(nome,documento)
 
-    l_profissionais.append(profissional)
+    l_visitantes.append(visitante)
 
 def buscaProfissional():
     dado = input("Você deseja acessar pelo nome ou pela profissão?")
     if dado == "nome":
         #Buscar pelo nome
-        nome = input("Qual o nome desse profissional?").upper
+        nome = input("Qual o nome desse profissional?").capitalize()
         for obj in l_profissionais:
+            print(obj)
             if obj.getDados()[0] == nome:
-                print(obj.getDados())
+                print(obj)
+            else:
+                print(f"não existe um profissional com o nome {nome}")
 
     elif dado == "profissão":
         #Buscar pela profissão
-        profissao = input("Qual profissão você busca?").upper
+        profissao = input("Qual profissão você busca?")
         for obj in l_profissionais:
             if obj.getDados()[1] == profissao:
                 print(obj.getDados())
@@ -51,10 +52,37 @@ def buscaProfissional():
     else:
         print("Opção inexistente")
 
+def testaVisitante():
+    visitante = input(input("qual o nome do visitante?").capitalize())
 
-#-----Início-----
-while True:
-    escolha = input(f"======================\n\
+    for obj in l_visitantes:
+        if obj.getDados()[0] == visitante:
+            return obj
+
+def testaProfissional():
+    profissional = input("Qual o nome do profissional?").capitalize()
+
+    for obj in l_profissionais:
+        if obj.getDados()[0] == profissional:
+            return obj
+    
+    else:
+        print("profissional não existe")
+
+def registraVisita():
+    """Pega visitante, profissional e horário do computador pra registrar uma visita
+    em um dicionario de dados usando o nome do visitante como chave"""
+        
+    visitante = testaVisitante()
+    profissional = testaProfissional()
+
+    dict_visitas[visitante.getDados()[0]] = (profissional.getDados()[0],datetime.datetime.now(),profissional.getDados()[2])
+
+       
+    
+
+def menu():
+    return input(f"======================\n\
 MENU\n\
 ======================\n\
 1- Cadastrar Profissional\n\
@@ -65,6 +93,12 @@ MENU\n\
 6- Gerar arquivo de Registros do dia\n\
 7- Ler arquivos profissionais / visitantes\n\
 Escolha:")
+
+
+#-----Início-----
+while True:
+    print (dict_visitas)
+    escolha = menu()
 
     if escolha == "1":
         #Cadastrar Profissional
@@ -80,5 +114,7 @@ Escolha:")
 
     elif escolha == "4":
         #Registrar uma visita agora
-        print()
+        registraVisita()
+
+    
         
