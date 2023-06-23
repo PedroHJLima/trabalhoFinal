@@ -1,6 +1,6 @@
 from profissional import Profissional
 from visitante import Visitante
-import datetime
+from datetime import *
   
 
 l_profissionais = []
@@ -53,7 +53,7 @@ def buscaProfissional():
         print("Opção inexistente")
 
 def testaVisitante():
-    visitante = input(input("qual o nome do visitante?").capitalize())
+    visitante = input("Qual o nome do visitante? ").capitalize()
 
     for obj in l_visitantes:
         if obj.getDados()[0] == visitante:
@@ -72,12 +72,20 @@ def testaProfissional():
 def registraVisita():
     """Pega visitante, profissional e horário do computador pra registrar uma visita
     em um dicionario de dados usando o nome do visitante como chave"""
-        
+    
     visitante = testaVisitante()
     profissional = testaProfissional()
 
-    dict_visitas[visitante.getDados()[0]] = (profissional.getDados()[0],datetime.datetime.now(),profissional.getDados()[2])
+    print(visitante)
+    chave = visitante.getDados()[0]
+    #valor = (profissional.getDados()[0], datetime.now().strftime("%d/%m/%Y %H:%M"), profissional.getDados()[2])
+    dict_visitas[chave] = [profissional.getDados()[0], datetime.now().strftime("%d/%m/%Y %H:%M"), profissional.getDados()[2]]
 
+def visitasProfissional(dicionario,nome):
+    for chave, valor_atual in dicionario.items():
+        if valor_atual[0] == nome:
+            return chave,valor_atual[0],valor_atual[1],valor_atual[2]
+    return None  # Retorna None se o valor não for encontrado
        
     
 
@@ -97,7 +105,6 @@ Escolha:")
 
 #-----Início-----
 while True:
-    print (dict_visitas)
     escolha = menu()
 
     if escolha == "1":
@@ -116,5 +123,19 @@ while True:
         #Registrar uma visita agora
         registraVisita()
 
+    elif escolha == "5":
+        #Quero ver quais visitas tal profissional recebeu. Devolvendo nome do visitante e a data da visita
+        profissional = input("Qual nome do profissional?").capitalize()
+
+        ########################
+        #CUIDADO -- COM ISSO, SÓ MOSTRA A PRIMEIRA VISITA DESSE PROFISSIONAL.
+        #ALTERAR PRA MOSTRAR TODAS
+        ####################
+        busca = visitasProfissional(dict_visitas,profissional)
+        print(busca)
+
+    elif escolha == "6":
+        #gerar um arquivo com o registro do dia
+        print()
     
         
