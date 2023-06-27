@@ -1,11 +1,13 @@
 from profissional import Profissional
 from visitante import Visitante
 from datetime import *
+import json
+import os
   
 
 l_profissionais = []
 l_visitantes = []
-dict_visitas = {'teste1':'teste2'}
+dict_visitas = {}
 
 def CriaProfissional():
     """Recebe nome, profissão e sala e coloca o profissional na lista"""
@@ -81,13 +83,57 @@ def registraVisita():
     #valor = (profissional.getDados()[0], datetime.now().strftime("%d/%m/%Y %H:%M"), profissional.getDados()[2])
     dict_visitas[chave] = [profissional.getDados()[0], datetime.now().strftime("%d/%m/%Y %H:%M"), profissional.getDados()[2]]
 
-def visitasProfissional(dicionario,nome):
+def visitasProfissional(dicionario, nome):
+    dictVisitas = {}
     for chave, valor_atual in dicionario.items():
         if valor_atual[0] == nome:
-            return chave,valor_atual[0],valor_atual[1],valor_atual[2]
-    return None  # Retorna None se o valor não for encontrado
-       
-    
+            if valor_atual[0] in dictVisitas:
+                # A chave já existe, atualizar o valor
+                dictVisitas[valor_atual[0]].append((chave, valor_atual[1], valor_atual[2]))
+            else:
+                # A chave não existe, adicionar uma nova entrada
+                dictVisitas[valor_atual[0]] = [(chave, valor_atual[1], valor_atual[2])]
+    return dictVisitas if dictVisitas else None
+
+def salvarProfissionais(lista_objetos, nome_arquivo):
+    # Converter a lista de objetos em uma lista de dicionários
+    lista_dicionarios = []
+    for objeto in lista_objetos:
+        dicionario = {
+            'nome': objeto.getDados()[0],
+            'profissao': objeto.getDados()[1],
+            'sala': objeto.getDados()[2]
+        }
+        lista_dicionarios.append(dicionario)       
+
+    if os.path.exists(nome_arquivo):
+        print(f"O arquivo '{nome_arquivo}' já existe. Modificando o arquivo existente.")
+        # Abrir o arquivo em modo de leitura e escrita
+        with open(nome_arquivo, 'r+') as arquivo:
+            # Carregar o conteúdo existente do arquivo
+            conteudo_existente = json.load(arquivo)
+
+            # Modificar o conteúdo existente com a nova lista de dicionários
+            conteudo_existente.extend(lista_dicionarios)
+
+            # Posicionar o cursor no início do arquivo
+            arquivo.seek(0)
+
+            # Salvar o conteúdo modificado no arquivo
+            json.dump(conteudo_existente, arquivo)
+    else:
+        # Salvar a lista de dicionários em um novo arquivo JSON
+        with open(nome_arquivo, 'w') as arquivo:
+            json.dump(lista_dicionarios, arquivo)
+            print(f"Arquivo '{nome_arquivo}' criado e salvo com sucesso.")
+
+def resgatar_objetos_do_arquivo(nome_arquivo):
+    with open(nome_arquivo, 'r') as arquivo:
+        conteudo = json.load(arquivo)
+    for item in conteudo:
+        profissional = Profissional()
+        profissional.setDados(item["nome"],item["profissao"],item["sala"])
+        l_profissionais.append(profissional)
 
 def menu():
     return input(f"======================\n\
@@ -105,6 +151,13 @@ Escolha:")
 
 #-----Início-----
 while True:
+    #Antes de começar o código, tem que verificar se já existem profissionais e visitantes cadastrados
+    if os.path.exists('profissionais'):
+        #Arquivo já existe, carregar e popular dicionario
+        chaves = resgatar_objetos_do_arquivo('profissionais')
+
+    print(l_profissionais)
+
     escolha = menu()
 
     if escolha == "1":
@@ -137,5 +190,9 @@ while True:
     elif escolha == "6":
         #gerar um arquivo com o registro do dia
         print()
+
+    elif escolha == "7":
+        #Salvar a lista atual
+        salvarProfissionais(l_profissionais,'profissionais')
     
         
