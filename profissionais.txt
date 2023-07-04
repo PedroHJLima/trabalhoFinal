@@ -1,1 +1,1 @@
-[{"nome": "Pedro", "profissao": "mecanico", "sala": "102"}, {"nome": "Gabriel", "profissao": "professor", "sala": "123"}]
+[["Pedro", "w", "w"]]

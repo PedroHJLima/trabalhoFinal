@@ -1,0 +1,2 @@
+Eu escolhi não permitir nomes repetido para que não ocorresse corrupção de dados na hora de gerar consultas, já que foi pedido que nomes fossem usados como chaves no dicionario
+na opção 4.
