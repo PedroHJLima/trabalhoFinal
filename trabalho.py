@@ -21,14 +21,15 @@ def CriaProfissional():
     sala = input("Em qual sala ele trabalha?")
 
     # Verificar se o nome já existe na lista de profissionais
-    for profissional in l_profissionais:
-        if profissional.getDados()[0] == nome:
+    for p in l_profissionais:
+        if p.getDados()[0] == nome:
             input("Já existe um profissional com esse nome.\nEnter pra continuar")
             return
 
     profissional.setDados(nome, profissao, sala)
 
-    l_profissionais.append(profissional)
+    return profissional
+
 
 
 ############# OPÇÃO 2 ############
@@ -40,7 +41,7 @@ def criaVisitante():
     nome = input("Qual o nome desse visitante?").capitalize()
     documento = input("Qual seu RG?")
 
-    for visitante in l_visitantes:
+    for v in l_visitantes:
         if visitante.getDados()[0] == nome:
             input("Já existe um visitante com esse nome.\nEnter pra continuar")
             return
@@ -53,6 +54,8 @@ def criaVisitante():
 ############# OPÇÃO 3 ############
 
 def printOBJ(obj):
+    """Recebe uma lista de profissionais e da um print em um por um"""
+    """Precisa ser uma lista pra imprimir todos que tenham a mesma profissão"""
     for objeto in obj:
         print(objeto.getDados())
 
@@ -127,7 +130,7 @@ def visitasProfissional(dicionario, nome):
             else:
                 # A chave não existe, adicionar uma nova entrada
                 dictVisitas[valor_atual[0]] = [chave, valor_atual[1], valor_atual[2]]
-    return dictVisitas if dictVisitas else print("Profissional sem visitas registradas")
+    return dictVisitas if dictVisitas else input("Profissional sem visitas registradas, enter para continuar")
 
 ############# OPÇÃO 6 ############
 
@@ -151,6 +154,7 @@ def arquivaVisita():
 
 
 def salvarDadosEmJSON(dados, nome_arquivo):
+    """Cria um arquivo em json com todas visitas registradas"""
     lista_dicionarios = []
     chaves_unicas = set()
 
@@ -179,12 +183,14 @@ def salvarDadosEmJSON(dados, nome_arquivo):
 ############# OPÇÃO 7 ############
 
 def salvarObjetos(lista_objetos, nome_arquivo):
+    print(lista_objetos)
     """Salva os objetos em arquivo txt em formato json, ignorando caso já exista alguem com nome igual na lista para impedir duplicidade durante uso"""
     lista_tuplas = []
     for objeto in lista_objetos:
         tupla = objeto.getDados()
         lista_tuplas.append(tupla)
 
+    print(lista_tuplas)
     if os.path.exists(nome_arquivo):
         print(f"O arquivo '{nome_arquivo}' já existe. Modificando o arquivo existente.")
         # Carregar o conteúdo existente do arquivo
@@ -223,8 +229,9 @@ def arquivoInexistente():
     input("Arquivo(s) inexistente(s). Enter para continuar")
 
 def deleta():
+    """Seleciona um arquivo e apaga ele"""
     arquivo = input("Qual arquivo você deseja deletar?\n1-Deletar lista de profissionais\n\
-2- Deletar lista de visitantes\n3-Ambos\nEscolha: ")
+2- Deletar lista de visitantes\n3- Visitas Realizadas\n4-Todos\nEscolha: ")
     if arquivo =="1":
         if os.path.exists("profissionais.txt"):
             #Quero deletar todos os profissionais
@@ -239,12 +246,20 @@ def deleta():
             os.remove("visitantes.txt")
         else:
             input(arquivoInexistente())
-    
+
     elif arquivo == "3":
+        if os.path.exists("visitasRealizadas.txt"):
+            #Quero deletar todos os visitantes
+            os.remove("visitasRealizadas.txt")
+        else:
+            input(arquivoInexistente())
+    
+    elif arquivo == "4":
         if os.path.exists("visitantes.txt") and os.path.exists("profissionais.txt"):
             #Remove os dois
             os.remove("visitantes.txt")
             os.remove("profissionais.txt")
+            os.remove("visitasRealizadas.txt")
         else:
             input(arquivoInexistente())
 
@@ -294,12 +309,13 @@ iniciar()
     
 
 while True:
-    print(dict_visitas)
+    print("\n"*3)
     escolha = menu()
-
     if escolha == "1":
         #Cadastrar Profissional
-        CriaProfissional()
+        profissional = CriaProfissional()
+        if profissional:
+            l_profissionais.append(profissional)
 
     elif escolha == "2":
         #Cadastrar visitante
@@ -307,7 +323,11 @@ while True:
 
     elif escolha == "3":
         #Buscar profissional pelo nome ou sala e devolver nome profissão e sala
-        printOBJ(buscaProfissional())
+        profissional = buscaProfissional()
+        if profissional:
+            printOBJ(profissional)
+        else:
+            print("Nenhum profissional encontrado")
 
     elif escolha == "4":
         #Registrar uma visita agora
@@ -318,7 +338,8 @@ while True:
         profissional = input("Qual nome do profissional?").capitalize()
 
         busca = visitasProfissional(dict_visitas,profissional)
-        print(busca)
+        if busca:
+            print(busca)
 
     elif escolha == "6":
         #gerar um arquivo JSON com o registro do dia
