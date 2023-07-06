@@ -8,6 +8,7 @@ import os
 l_profissionais = []
 l_visitantes = []
 dict_visitas = {}
+dicVisitantes = {}
 
 ############# OPÇÃO 1 ############
 
@@ -82,6 +83,7 @@ def buscaProfissional():
 def testaVisitante():
     visitante = input("Qual o nome do visitante? ").capitalize()
 
+
     for obj in l_visitantes:
         if obj.getDados()[0] == visitante:
             return obj
@@ -89,12 +91,13 @@ def testaVisitante():
 def testaProfissional():
     profissional = input("Qual o nome do profissional?").capitalize()
 
-    for obj in l_profissionais:
-        if obj.getDados()[0] == profissional:
-            return obj
+    try:
+        for obj in l_profissionais:
+            if obj.getDados()[0] == profissional:
+                return obj
     
-    else:
-        print("profissional não existe")
+    except:
+        input("Profissional inexistente, enter:")
 
 def registraVisita():
     """Pega visitante, profissional e horário do computador pra registrar uma visita
@@ -103,7 +106,6 @@ def registraVisita():
     visitante = testaVisitante()
     profissional = testaProfissional()
 
-    print(visitante)
     chave = visitante.getDados()[0]
 
     if chave in dict_visitas.keys():
@@ -124,42 +126,53 @@ def visitasProfissional(dicionario, nome):
                 dictVisitas[valor_atual[0]].append((chave, valor_atual[1], valor_atual[2]))
             else:
                 # A chave não existe, adicionar uma nova entrada
-                dictVisitas[valor_atual[0]] = [(chave, valor_atual[1], valor_atual[2])]
+                dictVisitas[valor_atual[0]] = [chave, valor_atual[1], valor_atual[2]]
     return dictVisitas if dictVisitas else print("Profissional sem visitas registradas")
 
 ############# OPÇÃO 6 ############
 
-def arquivaVisita(dicionario, nome_arquivo):
-    # Converter o dicionário de objetos em uma lista de dicionários
+def arquivaVisita():
+    visitante = testaVisitante()
+
+    try:
+        chave = visitante.getDados()[1]
+        nome = visitante.getDados()[0]
+    except:
+        input("Visitante inexistente")
+
+        for chave in dict_visitas.keys():
+            print(dict_visitas[nome][0], dict_visitas[nome][1], dict_visitas[nome][2])
+            if chave in dicVisitantes.keys():
+                #Já existe uma visita nesse nome
+                dicVisitantes[chave].append([dict_visitas[nome][0], dict_visitas[nome][1], dict_visitas[nome][2]])
+            else:
+                #Nenhuma visita nesse nome
+                dicVisitantes[chave] = [dict_visitas[nome][0], dict_visitas[nome][1], dict_visitas[nome][2]]
+
+
+def salvarDadosEmJSON(dados, nome_arquivo):
     lista_dicionarios = []
-    for objeto in dicionario.values():
-        print(objeto)
-        elementos = {
-            'nome': objeto.getDados()[0],
-            'documento': objeto.getDados()[1]
-        }
-        lista_dicionarios.append(elementos)       
+    chaves_unicas = set()
 
-    if os.path.exists(nome_arquivo):
-        print(f"O arquivo '{nome_arquivo}' já existe. Modificando o arquivo existente.")
-        # Abrir o arquivo em modo de leitura e escrita
-        with open(nome_arquivo, 'r+') as arquivo:
-            # Carregar o conteúdo existente do arquivo
-            conteudo_existente = json.load(arquivo)
+    for chave, valores in dados.items():
+        if chave not in chaves_unicas:
+            chaves_unicas.add(chave)
+            lista_dicionarios.append({
+                chave: [
+                    [valores[0], valores[1], valores[2]]
+                ]
+            })
+        else:
+            for dic in lista_dicionarios:
+                if chave in dic:
+                    dic[chave].append(valores[0], valores[1], valores[2])
+                    break
 
-            # Modificar o conteúdo existente com a nova lista de dicionários
-            conteudo_existente.extend(lista_dicionarios)
-
-            # Posicionar o cursor no início do arquivo
-            arquivo.seek(0)
-
-            # Salvar o conteúdo modificado no arquivo
-            json.dump(conteudo_existente, arquivo)
-    else:
-        # Salvar a lista de dicionários em um novo arquivo JSON
-        with open(nome_arquivo, 'w') as arquivo:
-            json.dump(lista_dicionarios, arquivo)
-            print(f"Arquivo '{nome_arquivo}' criado e salvo com sucesso.")
+    print(lista_dicionarios)
+        
+    with open(nome_arquivo, 'w') as arquivo:
+        json.dump(lista_dicionarios, arquivo)
+        print(f"Dados salvos em '{nome_arquivo}' com sucesso.")
 
 
 
@@ -241,6 +254,8 @@ def deleta():
 
 ############# MAIN ############
 
+
+
 def iniciar():
     if os.path.exists('profissionais.txt'):
         #Arquivo já existe, carregar e popular dicionario
@@ -279,7 +294,7 @@ iniciar()
     
 
 while True:
-
+    print(dict_visitas)
     escolha = menu()
 
     if escolha == "1":
@@ -307,8 +322,8 @@ while True:
 
     elif escolha == "6":
         #gerar um arquivo JSON com o registro do dia
-        print(dict_visitas)
-        arquivaVisita(dict_visitas,"VisitasRealizadas.txt")
+        arquivaVisita()
+        salvarDadosEmJSON(dict_visitas,'visitasRealizadas')
 
     elif escolha == "7":
         #Salva na lista existente os profissionais adicionados durante o uso
